@@ -7,7 +7,7 @@
 3.  How does the effect of forest structure and mortality decay with distance? How does it interact with weather (question below)?
 4.  Under what weather thresholds does forest structure and mortality not matter?
 
-# Approach
+## Approach
 
 -   Gather all the relevant predictors and response variables as raster layers
 -   Response:
@@ -16,7 +16,7 @@
     -   Fire history
         -   [x] severity of last fire,
         -   [x] years since last fire.
-        -   For severity---take the FRAP polygons, flatten fires, group by year into multipolygons. You'll have \~35 features. Use that for the GEE code (Parks et al. 2019), which won't have to be modified.
+        -   For severity---take the FRAP polygons, flatten fires, group by year into multipolygons. You'll have \~35 features, 1 for each year from 1984-2021. Use that for the GEE code (Parks et al. 2019), which won't have to be modified.
     -   topography
         -   [x] elevation
         -   [x] TPI
@@ -27,7 +27,7 @@
         -   [x] from IR flights
         -   [ ] MODIS? to fill in missing days?
     -   [ ] Fire direction---heading, backing, flanking informed by aspect, slope, direction of nearest fire progression perimeter
-    -   [ ] Forest structure--density, CHM? where available?
+    -   [ ] Forest structure--density, CHM where available?
     -   forest mortality
         -   [ ] Yan's model--based on 2020 NAIP
         -   [ ] eDart in the meantime--cumulative mortality from 2015-2020?
@@ -40,11 +40,15 @@
     -   Bayesian regression model using a distance-weighted coefficient for landscape mortality. Use \~25% of data, randomly selected, account for SA with NNGP.
     -   Run a ML model using the same predictors as above, except there's no functional structure to it.
 
-# Methods notes
+## Repo notes
+
+I didn't upload most of the spatial datasets bc of space. check out gitignore for that. 
+
+## Methods notes
 
 ### Fire severity data
 
-I used Parks et al (2019) to derive CBI from landsat imagery. That's gonna be my response variable. I also used that code to get the severity of the last fire under the KNP and Castle fire footprints. I don't think I have downloaded the data yet from my Drive (in the cbi folder) and put it on my computer locally, but I will. It'll reside in the outputs/GEE_CBI folder.
+I used Parks et al (2019) to derive CBI from landsat imagery. That's gonna be my response variable. I also used that code to get the severity of the last fire under the KNP and Castle fire footprints.
 
 ### IR data
 
@@ -63,6 +67,6 @@ Download data for each day. Assume flights were taken around midnight of that da
 -   Ensure that the previous day of fire was nested within that day's fire. Did this by unioning the geometry of polygon[t] with polygon[t-1] in a for-loop. Had to remove any linestrings that were created in the loop, keeping only polygons.
 -   Save both versions of the data: IR polygons with and without unioning (e.g. castle_byDay.geojson, castle_byDay_u.geojson)
 
-# Things to read
+## Things to read
 
 [Fitting scale-dependent landscape effect with greta - biologyforfun (lionel68.github.io)](https://lionel68.github.io/biological%20stuff/r%20and%20stat/fitting-scale-dependent-greta/)
