@@ -2,10 +2,8 @@
 rm(list=ls())
 library(sf)
 library(tidyverse)
-library(fasterize)
 library(nngeo) #remotes::install_github("michaeldorman/nngeo")
-library(cowplot)
-library(raster)
+library(terra)
 theme_set(theme_classic())
 
 
@@ -15,43 +13,36 @@ theme_set(theme_classic())
 #=========================================================================
 
 # load topogrpahy
-topo <- brick('../../../Documents/ArcGIS/Spatial_data/from_GEE/topography30m.tif')
-randompt <- as.data.frame(sampleRandom(topo, 1, xy = T))
+topo <- rast('outputs/topography/castle_terrain.tif')
+randompt <- spatSample(topo, 1, 'random', na.rm = T, xy = T)
 X0 = randompt$x
 Y0 = randompt$y
 
 # make polygons, where one is inside the other
+p4 <- st_buffer(st_point(c(X0 + 1200,Y0)), 2000)
 p3 <- st_buffer(st_point(c(X0 + 800,Y0)), 1000)
 p2 <- st_buffer(st_point(c(X0 + 400,Y0)), 500)
 p1 <- st_buffer(st_point(c(X0,Y0)), 100)
-geometry <- st_sfc(p1, p2, p3)
+geometry <- st_sfc(p1, p2, p3, p4)
 ndays <- length(geometry)
 polygons <- st_sf(day = 1:ndays, geometry, crs = crs(topo)) 
+#plot(arrange(polygons, rev(day)))
 
 # crop topo
 topocrop <- crop(x = topo, polygons)
-plot(topocrop, col = grey.colors(20))
 
 #=========================================================================
 # TURN POLYGONS INTO RASTER
 #=========================================================================
 
 # convert to raster
-pr <- fasterize(polygons, topocrop$elevation, field = 'day', fun = 'min')
-names(pr) <- 'day'
-
-plot(topocrop$hillshade, col = grey.colors(10))
-#plot(pr)
-plot(polygons$geometry, add = T)
-
+v <- vect(polygons)
+pr <- rasterize(rev(v), topocrop$elevation, 'day') 
 
 
 #=========================================================================
 # GET AZIMUTH TO NEAREST EDGE FROM LAST DAY
 #=========================================================================
-
-# how do you calculate azimuth to nearest pixel of given value?
-#https://stackoverflow.com/questions/60990366/calculating-azimuth-of-nearest-features
 
 # convert the pixels to points
 # convert the edge of the polygons to points
@@ -59,134 +50,150 @@ plot(polygons$geometry, add = T)
 # calculate azimuth to it.
 
 # pixels and edges to points
-pr_pts <- rasterToPoints(pr, spatial = T) %>% st_as_sf() %>% arrange(day) #raster as points
-perim_pts <- st_cast(polygons, 'LINESTRING') %>%  #perimeters as lines, ignore warning?
-  st_line_sample(., density= 5) %>% #convert to multipoints
-  st_sf(day = 1:ndays, .) %>% #add attributes
-  st_cast('POINT') #convert to points
-perim_pts$ID <- 1:nrow(perim_pts) #add ID to perimeter points for keeping track
-
-# visualize whats going on
-plot(pr)
-plot(pr_pts, add = T) 
-plot(perim_pts[,'day'], add = T, col = 'black') 
+pr_pts <- as.points(pr) %>% st_as_sf # turn raster into points
+perim_pts <- st_cast(polygons, 'LINESTRING') %>% # turn polygon edges into points
+  st_line_sample(density = 1) %>% # density = points per unit (m) 
+  st_sf(day = polygons$day, geometry = .) %>% 
+  st_cast('POINT')
 
 
-#find the nearest edge and add to sf object
-nearestedge <- rep(NA, nrow(pr_pts))
-v1 <- 1
-for(i in 1:ndays){
-  index <- st_nearest_feature(filter(pr_pts, day == i), filter(perim_pts, day == i-1))
-  ID <- filter(perim_pts, day == i-1)[index,] %>% pull('ID')
-  v2 <- length(index) -1 + v1
-  nearestedge[v1:v2] <- ID 
-  v1 <- v2 + 1
+# get azimuth to nearest polygon edge
+f_az_NN <- function(from, to){
+  
+  # is day to 1-day from? ignore for day 1
+  dayfrom <- unique(from$day)
+  if(dayfrom != 1 & dayfrom != unique(to$day) + 1){
+    warning(glue::glue('day from is {dayfrom} and day to is {unique(to$day)}'))
+  } 
+  
+  if(dayfrom <= 1){
+    message('time = 1 will result in NA')
+    return(rep(NA, nrow(from)))
+  } else {
+    nearest_edge <- to[st_nearest_feature(from, to),]
+    azimuth <- st_azimuth(from, nearest_edge)
+    return(azimuth)
+  }
 }
-pr_pts$nearestedge <- nearestedge
-nearestedge1 <- nearestedge
-nearestedge1[is.na(nearestedge1)] <- 1 #st_azimuth doesn't allow NAs, so temporarily assign NA values as 1
-pr_pts$nearestedge1 <- nearestedge1
 
-
-#calculate azimuth (and distance so I know I'm doing it right) to nearest edge
-pr_pts$dist <- st_distance(pr_pts, perim_pts[nearestedge,], by_element = T) %>% as.numeric()
-pr_pts$az <- st_azimuth(pr_pts, perim_pts[nearestedge1,])
-pr_pts$az[is.na(nearestedge)] <- NA #change the values within first polygon as NA
-
-
-# viz. I think that looks right.
-plot1 <- ggplot() +
-  geom_sf(data = pr_pts, aes(color = az), size = 3) +
-  scale_color_viridis_c(na.value = NA)
-plot2 <- ggplot() +
-  geom_sf(data = pr_pts, aes(color = dist), size = 3) +
-  scale_color_viridis_c(na.value = NA)
-plot3 <- ggplot() +
-  geom_sf(data = pr_pts, aes(color = nearestedge), size = 3) +
-  scale_color_viridis_c(na.value = NA)
-plot4 <- ggplot() +
-  geom_sf(data = pr_pts, aes(color = day), size = 3) +
-  geom_sf(data = perim_pts, size = 1) +
-  scale_color_viridis_c(na.value = NA)
-plot_grid(plot1, plot2, plot3, plot4)
-
-ggplot() +
-  geom_sf(data = perim_pts, aes(color = ID)) +
-  scale_color_viridis_c(na.value = NA)
-
-
-
+from_list <- split(pr_pts, pr_pts$day)
+to_list <- split(perim_pts, perim_pts$day)
+to_list <- to_list[c(1, 1:(length(to_list)-1))]
+pr_pts <- map2(from_list, to_list, f_az_NN) %>% 
+  map2_df(from_list, ., ~ mutate(.x, azimuth = .y, .after = day))
 
 #=========================================================================
 # DIRECTION OF FIRE
 #=========================================================================
 
 # first apply smoothing filter on aspect.
-topocrop$aspect_sm <- focal(topocrop$aspect, w=matrix(1/9,nrow=3,ncol=3)) 
+topocrop$aspect_sm <- focal(topocrop$aspect, fun = 'mean', w= 3) 
 
-# get topo values for all the raster points
-topovals <- extract(topocrop, pr_pts)
-pr2 <- cbind(pr_pts, topovals)
+# rasterize azimuth, get direction
+az_r <- rasterize(vect(pr_pts), pr, 'azimuth')
+dx <- abs(az_r - topocrop$aspect) 
+dx[dx > 180] <- 360 - dx
+mat <- rbind(
+  cbind(-Inf, 60, 1), # heading
+  cbind(60, 120, 2), # flanking
+  cbind(120, Inf, 3) # backing
+)
+dx_class <- classify(dx, mat)
 
-# get fire direction
-pr2 <- pr2 %>%
-  mutate(DX = abs(az - aspect),
-         DX = ifelse(DX>180, 360-DX, DX),
-         DX_class = case_when(
-           DX <= 60 ~ 'H',
-           DX <= 120 ~ 'F',
-           T ~ 'B'
-         ),
-         DX_class = ifelse(is.na(DX), NA, DX_class))
-plot5 <- ggplot() +
-  geom_sf(data = pr2, aes(color = DX), shape = 15) +
-  geom_sf(data = polygons, fill = NA) +
-  scale_color_viridis_c(direction = -1)
-plot5b <- ggplot() +
-  geom_sf(data = pr2, aes(color = DX_class), shape = 15) +
-  geom_sf(data = polygons, fill = NA) +
-  scale_color_viridis_d()
-plot6 <- ggplot() +
-  geom_sf(data = pr2, aes(color = hillshade), shape = 15) +
-  geom_sf(data = polygons, fill = NA) +
-  scale_color_gradient(low = grey(.1), high = grey(.9))
-#plot6
-plot_grid(plot5, plot5b, plot6, nrow = 1)
+fire_dir <- rast(list(az_r, dx, dx_class)) %>% 
+  setNames(c('azimuth', 'dir', 'dir_class'))
+
+
+
+
+
+
+# another faster way to do it ---------------------------------------------
+
+
+f_direction <- function(raster, t){
+  mask_from <- mask(raster, raster == t - 1, maskvalues = F)
+  raster_dir <- direction(mask_from, degrees = T, from = F)
+  
+  mask_to <- mask(raster, raster == t, maskvalues = F)
+  raster_dir <- mask(raster_dir, mask_to)
+  return(raster_dir)
+}
+
+az_r2 <- lapply(2:ndays, function(t) f_direction(pr, t)) %>% sprc %>% mosaic
+
+#par(mfrow = c(1,2))
+fm <- focalMat(az_r2, 30, 'Gauss')
+#plot(az_r2)
+az_r2 = focal(az_r2, fm, na.rm = F)# %>% plot
+
+# first apply smoothing filter on aspect.
+topocrop$aspect_sm <- focal(topocrop$aspect, fun = 'mean', w= 3)
+
+# rasterize azimuth, get direction
+dx <- abs(az_r2 - topocrop$aspect)
+dx[dx > 180] <- 360 - dx
+mat <- rbind(
+  cbind(-Inf, 60, 1), # heading
+  cbind(60, 120, 2), # flanking
+  cbind(120, Inf, 3) # backing
+)
+dx_class <- classify(dx, mat)
+
+fire_dir_2 <- rast(list(az_r2, dx, dx_class)) %>%
+  setNames(c('azimuth', 'dir', 'dir_class'))
+
+
 
 
 #=========================================================================
-# TRASH
+# visualize
 #=========================================================================
 
+fire_dir_df <- fire_dir %>% as.data.frame(xy = T)
+topo_df <- topocrop %>% as.data.frame(xy = T)
 
-# create a raster layer of the perimeter of each day, 
-# create a distance matrix between all the pixels of one day and the perimeter,
-# identify the nearest perimeter pixel,
-# calculate the azimuth to it.
+cowplot::plot_grid(
+  ggplot(topo_df) +
+    geom_raster(aes(x, y, fill = shade)) +
+    geom_sf(data = polygons, fill = NA) +
+    scale_fill_gradient(low = 'grey100', high = 'grey20'),
+  ggplot(fire_dir_df) +
+    geom_raster(aes(x, y, fill = azimuth)) +
+    geom_sf(data = polygons, fill = NA) +
+    scale_fill_gradient(low = 'grey100', high = 'grey20'),
+  ggplot(fire_dir_df) +
+    geom_raster(aes(x, y, fill = dir)) +
+    geom_sf(data = polygons, fill = NA) +
+    scale_fill_distiller(palette = 'RdYlBu', direction = 1),
+  ggplot(fire_dir_df) +
+    geom_raster(aes(x, y, fill = as.factor(dir_class))) +
+    geom_sf(data = polygons, fill = NA) +
+    scale_fill_brewer(palette = 'RdYlBu', direction = 1, 
+                      labels = c('heading', 'flanking', 'backing'))
+)
 
-# get perimeters, keep as a Raster object to calculate distances
-plines <- st_cast(polygons, 'MULTILINESTRING')
-prlines <- stars::st_rasterize(plines, stars::st_as_stars(r), options = 'All_TOUCHED=T') %>% 
-  as('Raster')
-plot(prlines)
-plot(plines, add = T)
 
+fire_dir_df <- fire_dir_2 %>% as.data.frame(xy = T)
 
-
-
-
-# get distance matrix between all pixels and pixels from day before
-prlines
-pr
-
-head(pr)
-head(prlines)
-plot(pr)
-plot(prlines, add = T, col = c('black', 'red'))
-xy2 <- raster::xyFromCell(pr, which(pr[] == 2)) # coordinates of day two
-xy1_line <- raster::xyFromCell(prlines, which(prlines[] == 1)) # coordinates of day 1 boundary
-
-dist()
-dist(xy2[1,], xy1_line)
+cowplot::plot_grid(
+  ggplot(as.data.frame(topocrop$shade, xy = T)) +
+    geom_raster(aes(x, y, fill = shade)) +
+    geom_sf(data = polygons, fill = NA) +
+    scale_fill_gradient(low = 'grey100', high = 'grey20'),
+  ggplot(fire_dir_df) +
+    geom_raster(aes(x, y, fill = azimuth)) +
+    geom_sf(data = polygons, fill = NA) +
+    scale_fill_gradient(low = 'grey100', high = 'grey20'),
+  ggplot(fire_dir_df) +
+    geom_raster(aes(x, y, fill = dir)) +
+    geom_sf(data = polygons, fill = NA) +
+    scale_fill_distiller(palette = 'RdYlBu', direction = 1),
+  ggplot(fire_dir_df) +
+    geom_raster(aes(x, y, fill = as.factor(dir_class))) +
+    geom_sf(data = polygons, fill = NA) +
+    scale_fill_brewer(palette = 'RdYlBu', direction = 1, 
+                      labels = c('heading', 'flanking', 'backing'))
+)
 
 

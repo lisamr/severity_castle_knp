@@ -39,10 +39,10 @@ lastFire_merged <- bind_rows(lastFire_castle, lastFire_rattlesnake, lastFire_knp
          lastFire = NULL)
   
 
-st_write(lastFire_castle, 'outputs/data4GEE/lastFire_castle.shp', delete_layer = T)
-st_write(lastFire_rattlesnake, 'outputs/data4GEE/lastFire_rattlesnake.shp', delete_layer = T)
-st_write(lastFire_knp, 'outputs/data4GEE/lastFire_knp.shp', delete_layer = T)
-st_write(lastFire_merged, 'outputs/data4GEE/lastFire_merged.shp', delete_layer = T)
+st_write(lastFire_castle, 'outputs/spatial/data4GEE/lastFire_castle.shp', delete_layer = T)
+st_write(lastFire_rattlesnake, 'outputs/spatial/data4GEE/lastFire_rattlesnake.shp', delete_layer = T)
+st_write(lastFire_knp, 'outputs/spatial/data4GEE/lastFire_knp.shp', delete_layer = T)
+st_write(lastFire_merged, 'outputs/spatial/data4GEE/lastFire_merged.shp', delete_layer = T)
 
 
 

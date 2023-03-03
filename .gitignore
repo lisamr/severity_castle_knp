@@ -2,5 +2,5 @@
 .Rhistory
 .RData
 .Ruserdata
-outputs
-data/IR
+outputs/spatial
+data

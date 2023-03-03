@@ -274,11 +274,11 @@ st_geometry_type(knp_byDay_u)
 
 # export data -------------------------------------------------------------
 
-if(!dir_exists('outputs/IR')) dir_create('outputs/IR')
-st_write(castle_byDay, 'outputs/IR/castle_byDay.geojson', delete_dsn = T)
-st_write(castle_byDay_u, 'outputs/IR/castle_byDay_u.geojson', delete_dsn = T)
-st_write(knp_byDay, 'outputs/IR/knp_byDay.geojson', delete_dsn = T)
-st_write(knp_byDay_u, 'outputs/IR/knp_byDay_u.geojson', delete_dsn = T)
+if(!dir_exists('outputs/spatial/IR')) dir_create('outputs/spatial/IR')
+st_write(castle_byDay, 'outputs/spatial/IR/castle_byDay.geojson', delete_dsn = T)
+st_write(castle_byDay_u, 'outputs/spatial/IR/castle_byDay_u.geojson', delete_dsn = T)
+st_write(knp_byDay, 'outputs/spatial/IR/knp_byDay.geojson', delete_dsn = T)
+st_write(knp_byDay_u, 'outputs/spatial/IR/knp_byDay_u.geojson', delete_dsn = T)
 
 
 
@@ -397,8 +397,8 @@ st_write(knp_byDay_u, 'outputs/IR/knp_byDay_u.geojson', delete_dsn = T)
 # sqf_all <- bind_rows(sqf_perims) %>% 
 #   mutate(Name = NULL, fire = 'SQF', jDay = yday(date)) %>% 
 #   arrange(rev(date))
-# dir_create('outputs/IR/SQF')
-# st_write(sqf_all, 'outputs/IR/SQF/sqf_IR.geojson', delete_dsn = T)
+# dir_create('outputs/spatial/IR/SQF')
+# st_write(sqf_all, 'outputs/spatial/IR/SQF/sqf_IR.geojson', delete_dsn = T)
 # 
 # 
 # tmp <- sqf_all %>% 

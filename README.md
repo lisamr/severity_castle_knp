@@ -19,36 +19,41 @@
         -   For severity---take the FRAP polygons, flatten fires, group by year into multipolygons. You'll have \~35 features, 1 for each year from 1984-2021. Use that for the GEE code (Parks et al. 2019), which won't have to be modified.
     -   topography
         -   [x] elevation
-        -   [x] TPI
+        -   [x] TPI -- need to buffer dem by 1000m since your window goes up to that.
         -   [x] HLI
         -   [x] slope
         -   [x] aspect
+        -   [x] add hillshade for viz
     -   daily fire progression perimeters
         -   [x] from IR flights
         -   [ ] MODIS? to fill in missing days?
-    -   [ ] Fire direction---heading, backing, flanking informed by aspect, slope, direction of nearest fire progression perimeter
-    -   [ ] Forest structure--density, CHM where available?
+    -   [x] Fire direction---heading, backing, flanking informed by aspect, slope, direction of nearest fire progression perimeter
+    -   [x] Forest structure--density, CHM where available? SD of NDVI might work eg. Koontz EcoLett 2020?.
+        -   [x] added NDVI, should be good enough. used composited landsat imagery year of fire
     -   forest mortality
         -   [ ] Yan's model--based on 2020 NAIP
         -   [ ] eDart in the meantime--cumulative mortality from 2015-2020?
     -   weather
         -   [ ] RH
+            -   [x] From Koontz EcoLet 2020: We calculated pre-fire fuel moisture as the median 100-h fuel moisture for the 3days prior to the fire using gridMET, a gridded meteorological product with a daily temporal resolution and a 4×4km spatial resolution (Abatzoglou [**2013**](https://onlinelibrary.wiley.com/doi/full/10.1111/ele.13447#ele13447-bib-0001)). The 100-hour fuel moisture is a correlate of the regional temperature and moisture which integrates the relative humidity, the length of day, and the amount of precipitation in the previous 24h. Thus, this measure is sensitive to multiple hot dry days across the 4x4km spatial extent of each grid cell, but not to diurnal variation in relative humidity nor to extreme weather events during a fire.
         -   [ ] wind
         -   [ ] inversions?
--   Stack these rasters---same crs, resolution, extent
+-   [x] Stack these rasters---same crs, resolution, extent
 -   Model the data
     -   Bayesian regression model using a distance-weighted coefficient for landscape mortality. Use \~25% of data, randomly selected, account for SA with NNGP.
     -   Run a ML model using the same predictors as above, except there's no functional structure to it.
 
 ## Repo notes
 
-I didn't upload most of the spatial datasets bc of space. check out gitignore for that. 
+I didn't upload most of the spatial datasets bc of space. check out gitignore for that.
 
 ## Methods notes
 
 ### Fire severity data
 
 I used Parks et al (2019) to derive CBI from landsat imagery. That's gonna be my response variable. I also used that code to get the severity of the last fire under the KNP and Castle fire footprints.
+
+-   [ ] About that: the default dates are 6/1 to 9/30. creek fire started 8/26. double check that the pre-fire imagery is for the previous year, not the same year as fire.
 
 ### IR data
 

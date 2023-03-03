@@ -8,10 +8,10 @@ library(spatialEco)
 library(glue)
 
 # use fire severity data as template for projection
-cbi <- rast('outputs/GEE_CBI/fireHistory_1985_2020_CBI_bc.tif') 
+cbi <- rast('outputs/spatial/GEE_CBI/fireHistory_1985_2020_CBI_bc.tif') 
 
 # load dem data, convert to terra spatRast
-dem_list <- read_rds('outputs/topography/dem_list.rds') 
+dem_list <- read_rds('outputs/spatial/topography/dem_list.rds') 
 dem_list <- map(dem_list, rast)
 
 # reproject rasters
@@ -26,7 +26,13 @@ dem_list_proj <- map(dem_list,
 
 f_terrain_metrics <- function(elev){
   # slope, aspect
-  slope_aspect <- terrain(elev, c('slope', 'aspect'))
+  slope_aspect <- terrain(elev, c('slope', 'aspect'), unit = 'degrees')
+  slope_aspect_r <- terrain(elev, c('slope', 'aspect'), unit = 'radians')
+  
+  # hillshade, takes inputs in radians
+  hillshade <- shade(slope_aspect_r$slope, slope_aspect_r$aspect, 
+             angle = c(45, 45, 45, 80), direction = c(225, 270, 315, 135))
+  hillshade <- Reduce(mean, hillshade) %>% setNames('shade')	
   
   # HLI
   heatload <- hli(elev) %>% setNames('HLI')
@@ -39,7 +45,7 @@ f_terrain_metrics <- function(elev){
   
   
   # join into a raster brick
-  brick <- rast(c(list(elev, slope_aspect, heatload), TPI_list))
+  brick <- rast(c(list(elev, slope_aspect, heatload, hillshade), TPI_list))
   return(brick)
   
 }
@@ -54,10 +60,12 @@ terrain_list <- map(dem_list_proj, f_terrain_metrics)
 fire_names <- sapply(strsplit(names(terrain_list), " "), `[`, 1) %>% 
   janitor::make_clean_names()
 
-dir_path <- 'outputs/topography'
+dir_path <- 'outputs/spatial/topography'
 if(!fs::dir_exists(dir_path)) fs::dir_create(dir_path)
 walk(seq_along(fire_names), 
-     ~ writeRaster(terrain_list[[.x]], glue('{dir_path}/{fire_names[.x]}_terrain.tif')))
+     ~ writeRaster(terrain_list[[.x]], 
+                   glue('{dir_path}/{fire_names[.x]}_terrain.tif'),
+                   overwrite = T))
 
 
 
