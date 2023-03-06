@@ -42,8 +42,8 @@ IR_knp <- IR_rasters[[2]]
 raster_list <- c(
   list(
     cbi_knp %>% setNames('cbi'),
-    crop(firehistory_cbi, topo_knp) %>% setNames('FH_cbi'), 
-    crop(firehistory_year, topo_knp) %>% setNames('FH_year'),
+    crop(firehistory_cbi, ndvi_knp) %>% setNames('FH_cbi'), 
+    crop(firehistory_year, ndvi_knp) %>% setNames('FH_year'),
     IR_knp %>% setNames('jday'),
     ndvi_knp %>% setNames('ndvi')
   ) ,
@@ -51,16 +51,16 @@ raster_list <- c(
   topo_knp
 )
 
-# force rasters to common extent. use topo layer.
-rasters_knp <- map(raster_list, extend, y = topo_knp) %>% rast 
+# force rasters to common extent. use ndvi layer.
+rasters_knp <- map(raster_list, extend, y = ndvi_knp) %>% rast 
 
 
 # Castle ==============================
 raster_list <- c(
   list(
     cbi_castle %>% setNames('cbi'),
-    crop(firehistory_cbi, topo_castle) %>% setNames('FH_cbi'), 
-    crop(firehistory_year, topo_castle) %>% setNames('FH_year'),
+    crop(firehistory_cbi, ndvi_castle) %>% setNames('FH_cbi'), 
+    crop(firehistory_year, ndvi_castle) %>% setNames('FH_year'),
     IR_castle %>% setNames('jday'),
     ndvi_castle %>% setNames('ndvi')
   ),
@@ -69,7 +69,7 @@ raster_list <- c(
 )
 
 # force rasters to common extent. use topo layer.
-rasters_castle <- map(raster_list, extend, y = topo_castle) %>% rast 
+rasters_castle <- map(raster_list, extend, y = ndvi_castle) %>% rast 
 
 
 
@@ -77,6 +77,6 @@ rasters_castle <- map(raster_list, extend, y = topo_castle) %>% rast
 
 path <- 'outputs/spatial/compiled'
 if(!dir.exists(path)) dir.create(path, recursive = T)
-writeRaster(rasters_knp, filename = file.path(path, 'rasters_knp.tif'))
-writeRaster(rasters_castle, filename = file.path(path, 'rasters_castle.tif'))
+writeRaster(rasters_knp, filename = file.path(path, 'rasters_knp.tif'), overwrite = T)
+writeRaster(rasters_castle, filename = file.path(path, 'rasters_castle.tif'), overwrite = T)
 

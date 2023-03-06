@@ -30,6 +30,7 @@
     -   [x] Fire direction---heading, backing, flanking informed by aspect, slope, direction of nearest fire progression perimeter
     -   [x] Forest structure--density, CHM where available? SD of NDVI might work eg. Koontz EcoLett 2020?.
         -   [x] added NDVI, should be good enough. used composited landsat imagery year of fire
+            -   [x] make a wider buffer around fire when exporting. 5km?
     -   forest mortality
         -   [ ] Yan's model--based on 2020 NAIP
         -   [ ] eDart in the meantime--cumulative mortality from 2015-2020?
@@ -53,7 +54,7 @@ I didn't upload most of the spatial datasets bc of space. check out gitignore fo
 
 I used Parks et al (2019) to derive CBI from landsat imagery. That's gonna be my response variable. I also used that code to get the severity of the last fire under the KNP and Castle fire footprints.
 
--   [ ] About that: the default dates are 6/1 to 9/30. creek fire started 8/26. double check that the pre-fire imagery is for the previous year, not the same year as fire.
+-   [x] About that: the default dates are 6/1 to 9/30. creek fire started 8/26. double check that the pre-fire imagery is for the previous year, not the same year as fire.
 
 ### IR data
 
