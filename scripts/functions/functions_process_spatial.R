@@ -37,3 +37,18 @@ f_rings <- function(loc, radii, crs){
   })
   return(res)
 }
+
+# create buffers (not donuts) around location i
+f_buffers <- function(loc, radii){
+  # test inputs
+  stopifnot(length(radii) > 1)
+  stopifnot(is.matrix(loc) | is.data.frame(loc))
+  stopifnot(c('x', 'y') %in% colnames(loc))
+
+  # make buffers
+  tmp <- expand_grid(loc, radii) %>% 
+    st_as_sf(coords = c('x', 'y')) 
+  res <- st_buffer(tmp, tmp$radii) %>% rename(radius = radii)
+  
+  return(res)
+}

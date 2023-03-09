@@ -1,12 +1,13 @@
 # compile geospatial data into a raster stack
 library(terra)
 library(tidyverse)
-
+library(sf)
 
 # load raster data inputs -------------------------------------------------
 
 cbi_castle <- rast('outputs/spatial/GEE_CBI/Castle_2020_CBI_bc.tif')
 cbi_knp <- rast('outputs/spatial/GEE_CBI/KNP_2021_CBI_bc.tif')
+mtbs <- rast('data/fires/mtbs_SQF_KNP.grd')
 firehistory_cbi <- rast('outputs/spatial/GEE_CBI/fireHistory_1985_2020_CBI_bc.tif')
 firehistory_year <- rast('outputs/spatial/GEE_CBI/fireHistory_1985_2020_Fire_Year.tif')
 firDir_castle <- rast('outputs/spatial/fire_direction/fire_dir_castle.tif')
@@ -39,6 +40,7 @@ IR_knp <- IR_rasters[[2]]
 # gonna keep the two fires seperate. should lead to smaller overall space. 
 
 # KNP ==================================
+
 raster_list <- c(
   list(
     cbi_knp %>% setNames('cbi'),
@@ -48,7 +50,8 @@ raster_list <- c(
     ndvi_knp %>% setNames('ndvi')
   ) ,
   firDir_knp,
-  topo_knp
+  topo_knp,
+  crop(mtbs, ndvi_knp) %>% setNames( paste0('mtbs_', names(.)))
 )
 
 # force rasters to common extent. use ndvi layer.
@@ -65,7 +68,8 @@ raster_list <- c(
     ndvi_castle %>% setNames('ndvi')
   ),
   firDir_castle,
-  topo_castle
+  topo_castle,
+  crop(mtbs, ndvi_castle) %>% setNames( paste0('mtbs_', names(.)))
 )
 
 # force rasters to common extent. use topo layer.
