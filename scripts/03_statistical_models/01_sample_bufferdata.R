@@ -60,7 +60,7 @@ buffers <- bind_rows(buffers_split)
 cl <- parallel::makeCluster(ncores - 1)
 doParallel::registerDoParallel(cl)
 tic()
-ndvi_packed <- wrap(r_brick[dist_dep_var])
+ndvi_packed <- wrap(r_brick[dist_dep_var]) # terra requires packing and unpacking in parrallel
 res <- foreach(i = 1:max(chunks)) %dopar% {
   r <- terra::unwrap(ndvi_packed)
   terra::extract(r, terra::vect(buffers_split[[i]]), fun = f)
@@ -73,9 +73,8 @@ res <- map(res, ~ rename(.x, inchunk_ID = ID))
 metrics_b <- map2(buffers_split, res, full_join)  %>% 
   bind_rows() %>% 
   select(-c(chunks, inchunk_ID)) 
-df_buffers <- buffers %>% 
-  st_drop_geometry() %>% 
-  mutate(metrics_b)
+df_buffers <- metrics_b %>% 
+  st_drop_geometry() 
   
 
 # sample rest of rasters --------------------------------------------------

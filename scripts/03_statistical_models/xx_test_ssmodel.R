@@ -13,10 +13,10 @@ dens <- rethinking::dens
 
 # make distance dependent data wide. N plots (rows) x M rings (cols)
 dd_var <- dat$buffers %>%
-  mutate(means_z = zscore(mean)) %>% 
-  pivot_wider(id_cols = id, names_from = radius, values_from = means_z, names_prefix = 'X_') %>% 
-  arrange(id) %>% 
-  select(-id) %>% 
+  mutate(var_z = zscore(ndvi.sd)) %>% 
+  pivot_wider(id_cols = siteID, names_from = radius, values_from = var_z, names_prefix = 'X_') %>% 
+  arrange(siteID) %>% 
+  select(-siteID) %>% 
   as.matrix()
 
 
@@ -65,9 +65,17 @@ mcmc_pairs(fit01$draws(c('ss', 'a0', 'beta', 'sigma')))
 
 # try with real data? -----------------------------------------------------
 
-y <- zscore(dat$preds$cbi)
-dat_list2 <- dat_list
-dat_list2$y <- y
+rmvals <- is.na(dat$preds$mtbs_CBI)
+
+dd_var2 <- dd_var[!rmvals,]
+y2 <- zscore(dat$preds$mtbs_CBI[!rmvals])
+
+dat_list2 <- list(
+  N = length(y2), 
+  M = ncol(dd_var2),
+  dd_var = dd_var2,
+  y = y2
+)
 
 fit02 <- stanmod$sample(data = dat_list2, 
                         iter_warmup = 1000,
