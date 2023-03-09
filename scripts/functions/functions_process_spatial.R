@@ -52,3 +52,10 @@ f_buffers <- function(loc, radii){
   
   return(res)
 }
+
+
+f_ring_area <- function(outer, inner){
+  Ao <- pi * outer^2
+  Ai <- pi * inner^2
+  Ao - Ai
+}
