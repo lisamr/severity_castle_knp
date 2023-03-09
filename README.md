@@ -12,6 +12,7 @@
 -   Gather all the relevant predictors and response variables as raster layers
 -   Response:
     -   [x] fire severity. Use ML-derived metric of CBI using the Parks et al. 2019 code.
+        -   [ ] figure out why CBI is distorted on the upper range. ~3% >2.25 in KNP fire, maybe a little higher for Castle. I didn't include Landsat9 to estimate KNP, but that wouldn't address why Castle fire is also low. Using values from MTBS for now.
 -   Possible predictors:
     -   Fire history
         -   [x] severity of last fire,
@@ -26,23 +27,23 @@
         -   [x] add hillshade for viz
     -   daily fire progression perimeters
         -   [x] from IR flights
-        -   [ ] MODIS? to fill in missing days?
+        -   [ ] MODIS or VIIRS to fill in missing days? VIIRS would be at 375m, MODIS at 1000m
     -   [x] Fire direction---heading, backing, flanking informed by aspect, slope, direction of nearest fire progression perimeter
     -   [x] Forest structure--density, CHM where available? SD of NDVI might work eg. Koontz EcoLett 2020?.
         -   [x] added NDVI, should be good enough. used composited landsat imagery year of fire
             -   [x] make a wider buffer around fire when exporting. 5km?
     -   forest mortality
         -   [ ] Yan's model--based on 2020 NAIP
-        -   [ ] eDart in the meantime--cumulative mortality from 2015-2020?
+        -   [ ] ~~eDart~~ F3 in the meantime
     -   weather
-        -   [ ] RH
-            -   [x] From Koontz EcoLet 2020: We calculated pre-fire fuel moisture as the median 100-h fuel moisture for the 3days prior to the fire using gridMET, a gridded meteorological product with a daily temporal resolution and a 4×4km spatial resolution (Abatzoglou [**2013**](https://onlinelibrary.wiley.com/doi/full/10.1111/ele.13447#ele13447-bib-0001)). The 100-hour fuel moisture is a correlate of the regional temperature and moisture which integrates the relative humidity, the length of day, and the amount of precipitation in the previous 24h. Thus, this measure is sensitive to multiple hot dry days across the 4x4km spatial extent of each grid cell, but not to diurnal variation in relative humidity nor to extreme weather events during a fire.
+        -   [ ] RH--gridmet?
         -   [ ] wind
         -   [ ] inversions?
 -   [x] Stack these rasters---same crs, resolution, extent
 -   Model the data
-    -   Bayesian regression model using a distance-weighted coefficient for landscape mortality. Use \~25% of data, randomly selected, account for SA with NNGP.
-    -   Run a ML model using the same predictors as above, except there's no functional structure to it.
+    -   Bayesian regression model using a ~~distance-weighted coefficient~~ scale-selecting coef for landscape mortality. Use \~25% of data, randomly selected, account for SA with NNGP.
+        -   [NNGP in Stan](https://mc-stan.org/users/documentation/case-studies/nngp.html)
+
 
 ## Repo notes
 
@@ -75,4 +76,12 @@ Download data for each day. Assume flights were taken around midnight of that da
 
 ## Things to read
 
-[Fitting scale-dependent landscape effect with greta - biologyforfun (lionel68.github.io)](https://lionel68.github.io/biological%20stuff/r%20and%20stat/fitting-scale-dependent-greta/)
+-   [Fitting scale-dependent landscape effect with greta - biologyforfun (lionel68.github.io)](https://lionel68.github.io/biological%20stuff/r%20and%20stat/fitting-scale-dependent-greta/)
+    -   The code in that blog post isn't that useful, but it was an entry way to the methods from Miguet et al 2017. 
+-   [Miguet 2017 paper](https://doi.org/10.1111/2041-210X.12830) explaining how to estimate the decay of distance-dependent effects
+-   [Moll et al. 2020](https://doi.org/10.1111/ecog.04762) on how urbanization impacts wildlife An application of the Miguet paper, including JAGS code
+    -   I tranlated these models into Stan. I tested it with simulated data (assumed that rings of SD of NDVI predicted normally distr. response variable) and it worked well. When I tried on real data, the scale parameter wasn't informed by the data whatsoever. Maybe I need more data? 
+-   [Monroe et al. 2022](https://doi.org/10.1002/ecs2.4320) used a scale-selecting parameter with linear interpolation to estimate the scale of effect (and uncertainty around it). Paper was on sage grouse counts and surrounding sagebrush habitat. I chatted with lead author a bit over Teams and he's readily communicative which is a plus
+    -   Pretend you have a whole bunch of focal sites and you created multiple concentric buffers around each one. These buffers extend from 50 to 2000 in 50m intervals and will be used to estimate which scale of the effect is strongest. Now you have a data matrix $\mathbf{E}$ containing the mean tree mortality within each of these buffers with N rows for each focal site and M columns for each scale. In the model, you estimate a parameter $\varsigma$, bounded between 1 and M, to select which scale of $\mathbf{E}$ is strongest in predicting your response variable. Because the data is computed in discrete steps, you use linear interpolation to estimate the effect of $\mathbf{E}$. E.g. if $\varsigma$ is 3.4, its calculated as $\mathbf{E[,3]} \times .6 + \mathbf{E[,4]} \times .4$.
+    -   Internally, to do this interpolation, you need to calculate the floor of $\varsigma$ and treat it as an integer in order to index $\mathbf{E}$. Stan doesn't allow parameters to be integers. I found this workaround on the Stan forum of someone else asking the exact question I needed [here](https://discourse.mc-stan.org/t/workaround-using-truncated-parameters-for-indexing/28971/2).
+    -   I tested out this approach and so far it's working, even with real data. 
