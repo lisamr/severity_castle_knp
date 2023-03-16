@@ -5,10 +5,10 @@ library(sf)
 
 # load raster data inputs -------------------------------------------------
 
-cbi_castle <- rast('outputs/spatial/GEE_CBI/Castle_2020_CBI_bc.tif')
-cbi_knp <- rast('outputs/spatial/GEE_CBI/KNP_2021_CBI_bc.tif')
+cbi_castle <- rast('outputs/spatial/GEE_CBI/issues/Castle_2020_CBI_bc_corrected.tif')
+cbi_knp <- rast('outputs/spatial/GEE_CBI/KNP_2021_CBI_bc_corrected.tif')
 mtbs <- rast('data/fires/mtbs_SQF_KNP.grd')
-firehistory_cbi <- rast('outputs/spatial/GEE_CBI/fireHistory_1985_2020_CBI_bc.tif')
+firehistory_cbi <- rast('outputs/spatial/GEE_CBI/fireHistory_1985_2020_CBI_bc_corrected.tif')
 firehistory_year <- rast('outputs/spatial/GEE_CBI/fireHistory_1985_2020_Fire_Year.tif')
 firDir_castle <- rast('outputs/spatial/fire_direction/fire_dir_castle.tif')
 firDir_knp <- rast('outputs/spatial/fire_direction/fire_dir_knp.tif')
