@@ -44,12 +44,20 @@ Reasons to look at scale of mortality: managers need to know where to conduct fu
         -   [ ] inversions?
 -   [x] Stack these rasters---same crs, resolution, extent
 -   Model the data
-    -   Bayesian regression model using a ~~distance-weighted coefficient~~ scale-selecting coef for landscape mortality. Use \~25% of data, randomly selected, account for SA with NNGP.
-        -   [NNGP in Stan](https://mc-stan.org/users/documentation/case-studies/nngp.html)
+    -   Bayesian regression model using either a ~~distance-weighted coefficient~~ scale-selecting coef for landscape mortality. Use \~5%? of data, randomly selected, account for SA with NNGP.
+        -   [NNGP in Stan](https://mc-stan.org/users/documentation/case-studies/nngp.html). I've tested this out before with good success.
 
 ## Repo notes
 
-I didn't upload most of the spatial datasets bc of space. check out gitignore for that.
+-   I didn't upload most of the spatial datasets bc of space. check out gitignore for that.
+
+-   at this point, still compiling much of the data. Waiting on NAIP-derived mortality layer from collaborator, need to get daily fire progression data. IR flight data has missing days. Might use VIIRS satellite data to interpolate boundaries. See: <https://www.mdpi.com/2072-4292/12/12/2061>
+
+-   I'm testing out how to estimate the scale at which mortality is important. Currently using sd of NDVI to test Stan code. There are 2 approaches--1) scale-selecting (SS) approach determines distance (with uncertainty) at which effect is greatest [(scripts/03_statistical_models/xx_test_ssmodel.R)](https://code.usgs.gov/lrosenthal/severity_castle_knp/-/blob/main/scripts/03_statistical_models/xx_test_ssmodel.R) and 2) distance-decay (DD) approach assumes that effect decays with distance, determined by a kernel function, and estimates parameter(s) controlling that decay [(scripts/03_statistical_models/xx_test_ddmodel.R)](https://code.usgs.gov/lrosenthal/severity_castle_knp/-/blob/main/scripts/03_statistical_models/xx_test_ddmodel.R).
+
+    -   SS summarizes data in buffers and DD summarizes data into non-overlapping rings. More info on these approaches in the linked literature down below.
+
+    -    I've found a way to do both approaches in Stan and both work well now. The D-D approach seems to require a bit more data, but will probalby be fine.
 
 ## Methods notes
 
@@ -58,6 +66,7 @@ I didn't upload most of the spatial datasets bc of space. check out gitignore fo
 I used Parks et al (2019) to derive CBI from landsat imagery. That's gonna be my response variable. I also used that code to get the severity of the last fire under the KNP and Castle fire footprints.
 
 -   [x] About that: the default dates are 6/1 to 9/30. creek fire started 8/26. double check that the pre-fire imagery is for the previous year, not the same year as fire.
+-   [x] Parks code uses deprecated Landsat datasets (collection1 instead of current collection2). Using the current Collection 2 dataset, which includes Landsat 9, you need to correct code for differences in scale and offset. GEE code corrected and datasets in this repo are updated.
 
 ### IR data
 
