@@ -17,7 +17,7 @@ fire <- st_read('data/fires/FRAP_SQF_KNP_perimeters.shp')
 # assign parameters
 #============================
 r_brick <- rast('outputs/spatial/compiled/rasters_knp.tif') 
-N <- 1000
+N <- 10000
 radii <- seq(50, 1000, by = 50) #c(30, seq(50, 1000, by = 100))
 dist_dep_var <- 'ndvi'
 perimeter <- fire[3,]

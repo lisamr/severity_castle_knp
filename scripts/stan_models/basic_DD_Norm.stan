@@ -10,7 +10,7 @@ data{
   vector[Nsim] area_sim;
 }
 transformed data{
-  real U = 2.0;
+  real U = max(square(dist_sq));
 }
 parameters{
   real<lower=0, upper = U> delta;
@@ -37,7 +37,7 @@ transformed parameters{
 model{
   a0 ~ normal(0, 1);
   beta ~ normal(0, 1);
-  delta ~ lognormal(0, 1) T[,U];
+  delta ~ lognormal(-1, 1.5) T[,U];
   sigma ~ normal(0, 1);
   
   y ~ normal(mu, sigma);
