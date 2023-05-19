@@ -5,15 +5,18 @@ data{
   vector<lower=0>[M] area; // area of rings. Rings same for all sites, so vector of area and distance applies to all sites.
   vector<lower=0>[M] dist_sq; // distance^2 from ring m to site centers
   vector[N] y; // response variable
-  int Nsim;
-  vector[Nsim] dist_sq_sim;
-  vector[Nsim] area_sim;
+  int Nsim_c; // simulating counterfactual
+  matrix[Nsim_c,M] dd_var_sim;
+  int Nsim_d; // simulating distance dep functions
+  vector[Nsim_d] dist_sq_sim;
+  vector[Nsim_d] area_sim;
 }
 transformed data{
-  real U = max(square(dist_sq));
+  real U = max(sqrt(dist_sq));
+  real L = 0.03; //lower limit for delta (30m). prevents sampling issues. 
 }
 parameters{
-  real<lower=0, upper = U> delta;
+  real<lower=L> delta; //real<lower=0, upper = U> delta;
   real a0;
   real beta;
   real<lower=0> sigma;
@@ -37,19 +40,28 @@ transformed parameters{
 model{
   a0 ~ normal(0, 1);
   beta ~ normal(0, 1);
-  delta ~ lognormal(-1, 1.5) T[,U];
+  delta ~ lognormal(-1, 1.5)T[L,];
   sigma ~ normal(0, 1);
   
   y ~ normal(mu, sigma);
 }
 generated quantities{
   vector[N] y_rep;
-  vector[Nsim] w_rep;
   for(i in 1:N){
     y_rep[i] = normal_rng(mu[i], sigma);
   }
   
+  // estimate counterfactual
+  vector[Nsim_c] y_sim;
+  for(i in 1:Nsim_c){
+    vector[Nsim_c] DD_sim = dd_var_sim * w; 
+    vector[Nsim_c] mu_sim = a0 + beta * DD_sim;
+    y_sim[i] = normal_rng(mu_sim[i], sigma);
+  }
+  
+  
   // generate weights for simulated data
+  vector[Nsim_d] w_rep;
   w_rep = exp(-dist_sq_sim / (2 * square(delta))) .* area_sim; 
   w_rep = w_rep / sum(w_rep);
 }

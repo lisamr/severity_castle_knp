@@ -30,7 +30,8 @@ Reasons to look at scale of mortality: managers need to know where to conduct fu
         -   [x] add hillshade for viz
     -   daily fire progression perimeters
         -   [x] from IR flights
-        -   [ ] MODIS or VIIRS to fill in missing days? VIIRS would be at 375m, MODIS at 1000m
+        -   [x] VIIRS to fill in missing days? use it completely?
+        -   [ ] for now use viirs. but manually assess when IR needs to be replaced with IR.
     -   [x] Fire direction---heading, backing, flanking informed by aspect, slope, direction of nearest fire progression perimeter
     -   [x] Forest structure--density, CHM where available? SD of NDVI might work eg. Koontz EcoLett 2020?.
         -   [x] added NDVI, should be good enough. used composited landsat imagery year of fire
@@ -57,7 +58,7 @@ Reasons to look at scale of mortality: managers need to know where to conduct fu
 
     -   SS summarizes data in buffers and DD summarizes data into non-overlapping rings. More info on these approaches in the linked literature down below.
 
-    -    I've found a way to do both approaches in Stan and both work well now. The D-D approach seems to require a bit more data, but will probalby be fine.
+    -   I've found a way to do both approaches in Stan and both work well now. The D-D approach seems to require a bit more data, but will probalby be fine.
 
 ## Methods notes
 

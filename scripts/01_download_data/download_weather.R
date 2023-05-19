@@ -28,7 +28,7 @@ res_castle <- getGridMET(aoi_castle, varname = vars,
 # export ------------------------------------------------------------------
 
 
-path <- 'outputs/spatial/weather'
+path <- 'outputs/spatial/weather/gridmet'
 if(!dir.exists(path)) dir.create(path)
 
 walk2(res_knp, vars, 
