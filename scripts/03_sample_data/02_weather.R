@@ -22,7 +22,7 @@ nc_paths <- dir_ls('data/Williams_weather/', recurse = T, glob = '*.nc')
 nc_names <- sub("\\.nc$", "", basename(nc_paths))
 wx_list <- map(nc_paths, ~ rast(.x)) %>% 
   set_names(nc_names)
-
+ 
 # assign sample locations -------------------------------------------------
 
 N <- 100
