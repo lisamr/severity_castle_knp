@@ -18,6 +18,11 @@ dat$preds %>% head
 dat$preds$cbi %>% hist
 summary(dat$preds$cbi)
 
+# fix this later
+dat$rings <- dat$rings %>% 
+  mutate(dead_area.mean = dead_area.mean/900) # omit once you fix this
+
+
 # assign an ordered, categorical variable for CBI
 # cutpoints from Miller & Thode 2007 (unchanged, low, mod, high)
 cuts <- c(0, .1, 1.25, 2.25, 3)
@@ -54,10 +59,10 @@ dat1 <- dat$preds %>%
 # select data
 dat2 <- dat1 %>% 
   as_tibble() %>% 
+  sample_n(1000) %>% 
   select(cbi_factor, dead_area, ndvi) %>% 
   drop_na() %>% 
-  mutate(across(-cbi_factor, zscore)) %>% 
-  sample_frac(.25)
+  mutate(across(-cbi_factor, zscore)) 
 dat2X <- as.matrix(dat2[,-1])
 
 # create data to simulate from 
@@ -97,9 +102,9 @@ inv_logit(apply(draws_c, 2, median))
 
 # look at fit
 y_rep <- fit1$draws('y_rep', format = 'matrix')
-ppc_dens_overlay(dat_list$y, y_rep[1:50,])
+#ppc_dens_overlay(dat_list$y, y_rep[1:50,])
 ppc_bars(dat_list$y, y_rep[1:50,])
-mcmc_pairs(fit1$draws(c('B', 'c')))
+#mcmc_pairs(fit1$draws(c('B', 'c')))
 
 # make sure the intercepts make sense
 cbi_counts <- table(dat2$cbi_factor)
@@ -169,14 +174,13 @@ ggplot(post_sim, aes(dead_area, median, color = class, fill = class, group = cla
 source('scripts/functions/functions_process_spatial.R')
 source('scripts/functions/functions_distance_dependence.R')
 
-
-
-# prep dist-dep variable. zscored in `f_ddvar_wide`
+N <- 300
 NA_cbi <- which(is.na(dat$preds$cbi))
-dat$rings <- dat$rings %>% 
-  mutate(dead_area.mean = dead_area.mean/900) %>% # omit once you fix this
-  filter(!(id %in% NA_cbi))
-ddvar_wide <- f_ddvar_wide(dat$rings, 'dead_area.mean') # dead_area.mean
+idx <- sample(dat$preds$ID[-NA_cbi], N)
+
+
+ddvar_wide <- f_ddvar_wide(dat$rings, 'count_red.mean') # dead_area.mean
+ddvar_wide <- ddvar_wide[idx,]
 
 # get area and distance vectors out
 dist_vec <- dat$rings %>% 
@@ -187,8 +191,7 @@ inner <- c(0, dist_vec[-length(dist_vec)]) # inner ring radius
 area_vec <- f_ring_area(dist_vec, inner) 
 
 # other fixed effects
-dat3 <- dat$preds %>% 
-  filter(!(ID %in% NA_cbi)) %>% 
+dat3 <- dat$preds[idx,] %>% 
   select(cbi_factor, ndvi, elevation) %>% 
   mutate(across(-cbi_factor, zscore))
 fixed_effects <- select(dat3, -cbi_factor) %>% as.matrix
@@ -234,7 +237,7 @@ fit_dd$summary(variables = c('B', 'beta', 'c', 'delta'))
 y_rep <- fit_dd$draws('y_rep', format = 'matrix')
 ppc_dens_overlay(dat_list$y, y_rep[1:50,])
 ppc_bars(dat_list$y, y_rep[1:50,])
-mcmc_pairs(fit_dd$draws(c('B', 'c', 'beta', 'delta')))
+#mcmc_pairs(fit_dd$draws(c('B', 'c', 'beta', 'delta')))
 
 
 
@@ -243,6 +246,8 @@ mcmc_pairs(fit_dd$draws(c('B', 'c', 'beta', 'delta')))
 # i adapted the stan model to include an array of matrices
 ddvar_wide_array <- map(c('count_red.mean', 'count_grey.mean'), 
                         ~f_ddvar_wide(dat$rings, .x))
+ddvar_wide_array <- map(ddvar_wide_array, ~ .x[idx,])
+
 
 
 dat_list <- list(
