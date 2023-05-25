@@ -51,8 +51,7 @@ fit_models <- function(N, B, sigma.sq, tau.sq, phi, M, n_chains, iters){
   dat <- make_data(N, B, sigma.sq, tau.sq, phi)
   
   # neighbor index
-  NN.matrix <- NNMatrix(coords = dat$coords, n.neighbors = M, n.omp.threads = 2, 
-                        cov.model = 'exponential')
+  NN.matrix <- NNMatrix(coords = dat$coords, n.neighbors = M, n.omp.threads = 2)
   
   # prep and run model 
   data_list <- list(N = N, M = M, P = P, 
@@ -62,7 +61,7 @@ fit_models <- function(N, B, sigma.sq, tau.sq, phi, M, n_chains, iters){
                     NN_ind = NN.matrix$NN_ind, 
                     NN_dist = NN.matrix$NN_dist, 
                     NN_distM = NN.matrix$NN_distM,  
-                    uB = uB, VB = VB, ss = ss, st = st, ap = ap, bp = bp)
+                    uB = uB, VB = VB, sS = ss, sT = st, ap = ap, bp = bp)
   myinits <-list(list(beta = c(1, 5), sigma = 1, tau = 0.5, phi = 12, 
                       w_b1 = rep(0, N)), 
                  list(beta = c(5, 5), sigma = 1.5, tau = 0.2, phi = 5, 
@@ -94,19 +93,19 @@ if(!dir.exists('scripts/xx_test_NNGP/model_fits')) dir.create('scripts/xx_test_N
 
 set.seed(1234)
 # data generating parameters
-N <- c(100, 200, 500, 1000)
+N <- 500 #c(100, 200, 500, 1000)
 B <- 5
-sigma.sq <- 1
-tau.sq <- .1
+sigma.sq <- 2
+tau.sq <- 0.1
 phi <- 3 / 0.5
 M = 6
 
 # parameters for sampling
 n_chains = 4
-iters = 1000
+iters = 500
 
 # load up model
-nngp_latentb1 <- cmdstan_model('scripts/xx_test_NNGP/latent_poisson_b1.stan')
+nngp_latentb1 <- cmdstan_model('scripts/xx_test_NNGP/latent_normal_tutorial.stan')
 
 
 results <- map(N, ~ fit_models(.x, B, sigma.sq, tau.sq, phi, M, n_chains, iters))
@@ -123,9 +122,10 @@ ggplot(results_df, aes(N, log(tdelta))) +
   geom_line()
 
 mod <- lm(log(tdelta) ~ N, data = results_df)
-secs <- predict(mod, newdata = data.frame(N = c(1000, 10000))) %>% exp
-secs/60/60
-
+v <- c(N, 1000, 2000, 5000)
+secs <- predict(mod, newdata = data.frame(N = v)) %>% exp
+hrs <- secs/60/60
+plot(v, log(hrs), type = 'o')
 
 # look at model summaries -------------------------------------------------
 
@@ -135,3 +135,10 @@ fit <- cmdstanr::as_cmdstan_fit(c('scripts/xx_test_NNGP/model_fits/N1000_M6-1.cs
                            'scripts/xx_test_NNGP/model_fits/N1000_M6-3.csv',
                            'scripts/xx_test_NNGP/model_fits/N1000_M6-4.csv'))
 fit$summary(c('beta', 'sigma', 'tau', 'phi'))
+
+
+csv_files <- fs::dir_ls('scripts/xx_test_NNGP/model_fits', glob = '*N500*')
+fit2 <- as_cmdstan_fit(csv_files)
+fit2$summary(c('beta', 'sigmasq', 'tausq', 'phi'))
+
+

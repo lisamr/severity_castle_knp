@@ -55,18 +55,18 @@ get_NN_ind <- function (ind, ind_distM_i, M) {
 ##'                by ordered coords[i,]. The default used when ord is not 
 ##'                specified is x-axis ordering, i.e., order(coords[,1]). This 
 ##'                argument should typically be left blank.
-##' cov.model:     "exponential", "matern", "spherical", "gaussian" 
 ####
 
-NNMatrix <- function(coords, n.neighbors, n.omp.threads = 2, cov.model = 'exponential',
+NNMatrix <- function(coords, n.neighbors, n.omp.threads = 2, 
                      search.type = "cb", ord = order(coords[, 1])){
   
   N <- nrow(coords)
+  # this is just to get the neighbor matrices out
   m.c <- spConjNNGP(rep(0, N) ~ 1, coords = coords,
                     n.neighbors = n.neighbors,
                     theta.alpha = c("phi" = 5, "alpha" = 0.5),
                     sigma.sq.IG = c(2, 1),
-                    cov.model = cov.model,
+                    cov.model = 'exponential',
                     n.omp.threads = n.omp.threads,
                     search.type = search.type,
                     ord = ord,
