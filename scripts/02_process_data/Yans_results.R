@@ -8,7 +8,7 @@ library(tidyverse)
 
 # load yan's files
 yans_paths <- fs::dir_ls('data/Yan_models/', glob = '*.tif')
-yans_names <- c('dead_area', 'count_red', 'count_grey', 'eccent', 'nonveg_mask')
+yans_names <- c('dead_area', 'count_grey', 'count_red', 'eccent', 'nonveg_mask')
 yans_files <- map(yans_paths, ~ rast(.x))
 
 
