@@ -30,15 +30,36 @@ yans_files$dead_area <- ifel(is.na(yans_files$dead_area), 0, yans_files$dead_are
 yans_files$dead_count <- yans_files$count_red + yans_files$count_grey
 
 
+
+
+# mask out non-conifers ---------------------------------------------------
+
+# I think yan's model picked up a lot of hardwoods as 'red phase' trees
+# only include conifer mortality?
+veg <- rast('data/SEKI_veg/veg30m.tif') # confer = 1
+conifer <- ifel(veg == 1, 1, 0)
+conifer <- crop(conifer, yans_files)
+
+# mask: if conifer==0, mask and update yan's files as 0. 
+yans_files_conifer <- terra::mask(yans_files, conifer, maskvalue = 0, updatevalue = 0)
+par(mfrow = c(1, 2))
+plot(yans_files_conifer$count_grey)
+plot(yans_files$count_grey)
+plot(yans_files_conifer$count_red)
+plot(yans_files$count_red)
+
+
 # export ------------------------------------------------------------------
 
 path <- 'outputs/spatial/Yan'
 if(!dir.exists(path)) dir.create(path, recursive = T)
 writeRaster(yans_files, filename = file.path(path, 'yans_files.tif'), overwrite = T)
-# 
-# 
-# n = 10000
-# tmp <- spatSample(yans_files, n, na.rm=T)
+writeRaster(yans_files_conifer, filename = file.path(path, 'yans_files_conifer.tif'), overwrite = T)
+
+
+
+# n = 5000
+# tmp <- spatSample(yans_files_conifer, n, na.rm=T)
 # tmp2 <- tmp %>%
 #   mutate(across(everything(), function(x){
 #     (x-mean(x))/sd(x)

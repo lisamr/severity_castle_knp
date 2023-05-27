@@ -41,6 +41,7 @@ Reasons to look at scale of mortality: managers need to know where to conduct fu
             -   [x] make a wider buffer around fire when exporting. 5km?
     -   forest mortality
         -   [x] Yan's model--based on 2020 NAIP
+            -   [x] check if red trees are just tracking hardwoods (e.g. buckeyes, blue oaks). if so, would want to mask those out and only consider dead conifers for both red and grey stage trees.
         -   [ ] ~~eDart~~ F3 in the meantime. Looked at F3 mortality dataset. it's from MMI. need to compile that from individual years.
         -   [x] F3 predictions of live trees. Using TPA\--live tree counts 24+inches in DBH
     -   weather

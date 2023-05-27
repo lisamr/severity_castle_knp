@@ -2,7 +2,7 @@
 .Rhistory
 .RData
 .Ruserdata
-outputs/spatial
+outputs
 data
 documents 
 scripts/hilbert_space/model_outputs
