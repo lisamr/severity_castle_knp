@@ -33,12 +33,12 @@ f_union <- function(polygons, by_daytime){
   if(by_daytime){
     # group by day and time of day
     polys_byDay <- polygons %>% 
-      group_by(jday, DAYNIGHT) %>% 
+      group_by(jday_adj, DAYNIGHT) %>% 
       summarize()
   }else{
     # group by day and time of day
     polys_byDay <- polygons %>% 
-      group_by(jday) %>% 
+      group_by(jday_adj) %>% 
       summarize()
   }
 
@@ -55,13 +55,13 @@ f_union <- function(polygons, by_daytime){
         st_union()
     }
     st_geometry(polys_byDay_u)[i+1] <- new_geom2
-    cat('finished unioning jday:', polys_byDay_u$jday[i+1], '\n')
+    cat('finished unioning jday_adj:', polys_byDay_u$jday_adj[i+1], '\n')
   }
   
   # update area
   polys_byDay_u <- polys_byDay_u %>% 
     ungroup() %>% 
-    mutate(ha_total = st_area(.) %>% units::set_units('ha'), .after = jday)
+    mutate(ha_total = st_area(.) %>% units::set_units('ha'), .after = jday_adj )
   
   return(polys_byDay_u)
 }
@@ -92,13 +92,18 @@ viirs_d <- viirs %>%
          time = paste(hour, minute, sep = ':'),
          datetime = ymd_hm(paste(ACQ_DATE, time)) %>% with_tz('US/Pacific'),
          date = date(datetime),
+         date_adj = case_when(DAYNIGHT == 'N'~date - 1, T~date),
          jday = yday(date),
-         jday_daynight = paste(jday, DAYNIGHT, sep = '_')) %>% 
+         jday_adj = ifelse(DAYNIGHT == 'N', jday - 1, jday),
+         jday_daynight_adj = paste(jday_adj, DAYNIGHT, sep = '_')) %>% 
   select(-c(hour, minute, time, ACQ_DATE, ACQ_TIME)) %>% 
   filter(CONFIDENCE != 'l') # remove low confidence
 
 
-
+viirs_d %>% 
+  mutate(hr = hour(datetime)) %>% 
+  count(DAYNIGHT, hr)
+# D = 12-15pm, N = 1-3am
 
 # make perimeters ---------------------------------------------------------
 
@@ -118,25 +123,25 @@ make_perimeters <- function(pts, by_daytime){
   if(by_daytime){
     # make a list of polygon hulls
     polys_list <- pts %>%
-      group_split(jday, DAYNIGHT) %>%
+      group_split(jday_adj, DAYNIGHT) %>%
       map(f_cluster_hull, d) 
     groups <- pts %>%
-      group_split(jday, DAYNIGHT) %>% 
-      map_df(~ distinct(.x, jday, DAYNIGHT))
+      group_split(jday_adj, DAYNIGHT) %>% 
+      map_df(~ distinct(.x, jday_adj, DAYNIGHT))
     # add in dates
     dates <- pts %>% 
-      distinct(jday, date, DAYNIGHT)
+      distinct(jday_adj, date_adj, DAYNIGHT)
   }else{
     # make a list of polygon hulls
     polys_list <- pts %>%
-      group_split(jday) %>%
+      group_split(jday_adj) %>%
       map(f_cluster_hull, d) 
     groups <- pts %>%
-      group_split(jday) %>% 
-      map_df(~ distinct(.x, jday))
+      group_split(jday_adj) %>% 
+      map_df(~ distinct(.x, jday_adj))
     # add in dates
     dates <- pts %>% 
-      distinct(jday, date)
+      distinct(jday_adj, date_adj)
   }
   
   
@@ -179,6 +184,10 @@ make_perimeters <- function(pts, by_daytime){
 perims_viirs <- make_perimeters(viirs_d, F)
 perims_viirs_bydaytime <- make_perimeters(viirs_d, T)
 perims_viirs_suomi <- make_perimeters(viirs_d %>% filter(SATELLITE == 'N'), F)
+perims_viirs_suomi_bydaytime <- make_perimeters(viirs_d %>% filter(SATELLITE == 'N'), T)
+
+
+
 
 # export ------------------------------------------------------------------
 
@@ -187,12 +196,21 @@ if(!dir.exists(path)) dir.create(path)
 write_rds(perims_viirs, glue::glue({path},"perims_viirs.rds"))
 write_rds(perims_viirs_bydaytime, glue::glue({path},"perims_viirs_bydaytime.rds"))
 write_rds(perims_viirs_suomi, glue::glue({path},"perims_viirs_suomi.rds"))
-
+write_rds(perims_viirs_suomi_bydaytime, glue::glue({path},"perims_viirs_suomi_bydaytime.rds"))
 
 
 
 # visualize ---------------------------------------------------------------
 # 
+# perims_viirs$polys_growth
+# perims_viirs_bydaytime$polys_growth
+# cowplot::plot_grid(
+#   ggplot(perims_viirs_bydaytime$polys_growth, aes(fill = DAYNIGHT)) +
+#     geom_sf(),
+#   ggplot(perims_viirs_suomi_bydaytime$polys_growth, aes(fill = DAYNIGHT)) +
+#     geom_sf()
+# )
+
 # IR <- st_read('outputs/spatial/IR/knp_byDay_u.geojson')
 # IR_growth <- map_df(2:nrow(IR), 
 #        ~ suppressWarnings(

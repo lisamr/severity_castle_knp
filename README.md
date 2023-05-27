@@ -31,18 +31,26 @@ Reasons to look at scale of mortality: managers need to know where to conduct fu
     -   daily fire progression perimeters
         -   [x] from IR flights
         -   [x] VIIRS to fill in missing days? use it completely?
+            -   [x] the satellites pass over in the afternoon (12-3pm) and evening (1-3am). I adjusted the dates so that observations at night refer to the day before since most of the growth was happening when it was light out.
+
+            -   [x] used DBSCAN to cluster points using 1125 m and 3 points min. values come from Briones 2020 paper. Then used concave hull to make perimeters. should approximate that ArcPro tool.
         -   [ ] for now use viirs. but manually assess when IR needs to be replaced with IR.
     -   [x] Fire direction---heading, backing, flanking informed by aspect, slope, direction of nearest fire progression perimeter
     -   [x] Forest structure--density, CHM where available? SD of NDVI might work eg. Koontz EcoLett 2020?.
         -   [x] added NDVI, should be good enough. used composited landsat imagery year of fire
             -   [x] make a wider buffer around fire when exporting. 5km?
     -   forest mortality
-        -   [ ] Yan's model--based on 2020 NAIP
+        -   [x] Yan's model--based on 2020 NAIP
         -   [ ] ~~eDart~~ F3 in the meantime. Looked at F3 mortality dataset. it's from MMI. need to compile that from individual years.
+        -   [x] F3 predictions of live trees. Using TPA\--live tree counts 24+inches in DBH
     -   weather
-        -   [x] RH--gridmet?
-        -   [x] ~~wind~~
-        -   [ ] inversions?
+        -   [x] might want daytime info. viirs comes by at \~noon (Day) and \~midnight (Night). Night show way more growth bc it's capturing afternoon fires.
+        -   [x] climate variables from Park Williams. Metadata/explanations are in that folder (wiliams_weather)
+            -   [x] daily weather when fire passed over. outputted as sf points. sampled on a 180m grid.
+
+                -   [ ] should the weather also be resampled at a 30m grid? probably.
+
+            -   [x] climate averages 2000-2020 May1-Oct31. raster should be resampled at a 30m grid.
 -   [x] Stack these rasters---same crs, resolution, extent
 -   Model the data
     -   Bayesian regression model using either a ~~distance-weighted coefficient~~ scale-selecting coef for landscape mortality. Use \~5%? of data, randomly selected, account for SA with NNGP.
