@@ -25,6 +25,13 @@ climate <- rast('outputs/spatial/weather/climate_means_2000_2020_MayOct.tif')
 climate_crs <- project(climate, yan)
 
 
+
+# last minute small manipulations -----------------------------------------
+
+# change NAs to 0 in TPA
+F3 <- ifel(is.na(F3), 0, F3)
+
+
 # merge -------------------------------------------------------------------
 
 # gonna keep the two fires seperate. should lead to smaller overall space. 
