@@ -1,0 +1,13 @@
+---
+title: "model written out"
+author: "Lisa Rosenthal"
+date: "2023-05-30"
+output: html_document
+---
+
+$$
+y_i \sim \text{ordered-logit}(\phi_i, \kappa) \\
+\phi_i = XB + (X_{DD} W)\beta + \text{interaction terms} \\
+w_{0[m]} = exp(-2*distance_m^2 / \delta^2) * area_m \\
+W = \frac{w_0}{\sum^M_m w_{0[m]} }
+$$

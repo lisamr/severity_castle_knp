@@ -53,3 +53,4 @@ nFires_knp <- f_union(fires[3,], nF1985_202) %>% rename(nFires85 = var)
 plot(nFires_castle)
 plot(nFires_rattlesnake)
 plot(nFires_knp)
+

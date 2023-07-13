@@ -21,6 +21,24 @@ yans_files <- rast('outputs/spatial/Yan/yans_files.tif')
 TPA <- rast('data/F3_2019_livetrees/Total3Run_TPA24UP_NoMGT_2019_V20220512.tif')
 TPA_reproj <- project(TPA, yans_files)
 
+
+# mask out non-conifers 
+
+# yan's models picked up a lot of senescing hardwoods. to be consistent, 
+# mask out this too
+veg <- rast('data/SEKI_veg/veg30m.tif') # confer = 1
+conifer <- ifel(veg == 1, 1, 0)
+conifer <- crop(conifer, TPA_reproj)
+
+# mask: if conifer==0, mask and update yan's files as 0. 
+TPA_conifer <- terra::mask(TPA_reproj, conifer, 
+                            maskvalue = 0, updatevalue = 0)
+
+
+
+
+
 # export
 if(!dir.exists('outputs/spatial/livetrees')) dir.create('outputs/spatial/livetrees')
 writeRaster(TPA_reproj, 'outputs/spatial/livetrees/TPA24.tif')
+writeRaster(TPA_conifer, 'outputs/spatial/livetrees/TPA24_conifer.tif')

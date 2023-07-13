@@ -16,6 +16,10 @@ names(lookup)
 lookup$CalvegDesc %>% sort 
 
 
+# how big were the fires?
+st_area(fires) %>% units::set_units('ha') %>% sum
+
+
 # severity classes?
 length(cells(ifel(Cast_sev >= 2.25, 1, NA))) / length(cells(Cast_sev)) # 43.7
 cellSize(ifel(Cast_sev >= 2.25, 1, NA), unit = 'ha') %>% 

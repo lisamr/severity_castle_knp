@@ -85,9 +85,11 @@ model {
 }
 generated quantities {
   array[N] int<lower=1, upper=K> y_rep; 
+  vector[N] log_lik;
+  
   // vector[Nsim] phi_sim;
   for(n in 1:N) y_rep[n] = ordered_logistic_rng(phi[n], c);
-  
+  for(n in 1:N) log_lik[n] = ordered_logistic_lpmf(y[n] | phi[n], c);
   // // estimate log-cumulative-odds of getting each category for the sim data.
   // phi_sim = Xsim*B + beta*dd_var_sim*w;
   

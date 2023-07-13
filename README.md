@@ -30,6 +30,7 @@ Reasons to look at scale of mortality: managers need to know where to conduct fu
         -   [x] add hillshade for viz
     -   daily fire progression perimeters
         -   [x] from IR flights
+            -   [x] Dates: flights usually around midnight. dates recorded as next day (eg. 10/16 \@ 2300 = 10/17). adjust the date so the climate is extracted from previous day.
         -   [x] VIIRS to fill in missing days? use it completely?
             -   [x] the satellites pass over in the afternoon (12-3pm) and evening (1-3am). I adjusted the dates so that observations at night refer to the day before since most of the growth was happening when it was light out.
 
