@@ -1,0 +1,46 @@
+# stan_version_major = 2
+# stan_version_minor = 31
+# stan_version_patch = 0
+# model = latent_normal_tutorial_model
+# start_datetime = 2023-05-23 00:23:11 UTC
+# method = sample (Default)
+#   sample
+#     num_samples = 500
+#     num_warmup = 500
+#     save_warmup = 0 (Default)
+#     thin = 1 (Default)
+#     adapt
+#       engaged = 1 (Default)
+#       gamma = 0.050000000000000003 (Default)
+#       delta = 0.80000000000000004 (Default)
+#       kappa = 0.75 (Default)
+#       t0 = 10 (Default)
+#       init_buffer = 75 (Default)
+#       term_buffer = 50 (Default)
+#       window = 25 (Default)
+#     algorithm = hmc (Default)
+#       hmc
+#         engine = nuts (Default)
+#           nuts
+#             max_depth = 10 (Default)
+#         metric = diag_e (Default)
+#         metric_file =  (Default)
+#         stepsize = 1 (Default)
+#         stepsize_jitter = 0 (Default)
+#     num_chains = 1 (Default)
+# id = 2
+# data
+#   file = C:/Users/LROSEN~1/AppData/Local/Temp/5/RtmpMHvccH/standata-4c286bdc36d.json
+# init = C:/Users/LROSEN~1/AppData/Local/Temp/5/RtmpMHvccH/init-2-4c284cc317e4.json
+# random
+#   seed = 515773351
+# output
+#   file = C:/Users/lrosenthal/OneDrive - DOI/Desktop/severity_castle_knp/scripts/xx_test_NNGP/model_fits/N500_M6-2.csv
+#   diagnostic_file =  (Default)
+#   refresh = 100 (Default)
+#   sig_figs = -1 (Default)
+#   profile_file = C:/Users/lrosenthal/OneDrive - DOI/Desktop/severity_castle_knp/scripts/xx_test_NNGP/model_fits/latent_normal_tutorial-profile-2.csv
+# num_threads = 1 (Default)
+# stanc_version = stanc3 v2.31.0
+# stancflags = --name=latent_normal_tutorial_model
+lp__,accept_stat__,stepsize__,treedepth__,n_leapfrog__,divergent__,energy__,beta.1,beta.2,sigma,tau,phi,w_b1.1,w_b1.2,w_b1.3,w_b1.4,w_b1.5,w_b1.6,w_b1.7,w_b1.8,w_b1.9,w_b1.10,w_b1.11,w_b1.12,w_b1.13,w_b1.14,w_b1.15,w_b1.16,w_b1.17,w_b1.18,w_b1.19,w_b1.20,w_b1.21,w_b1.22,w_b1.23,w_b1.24,w_b1.25,w_b1.26,w_b1.27,w_b1.28,w_b1.29,w_b1.30,w_b1.31,w_b1.32,w_b1.33,w_b1.34,w_b1.35,w_b1.36,w_b1.37,w_b1.38,w_b1.39,w_b1.40,w_b1.41,w_b1.42,w_b1.43,w_b1.44,w_b1.45,w_b1.46,w_b1.47,w_b1.48,w_b1.49,w_b1.50,w_b1.51,w_b1.52,w_b1.53,w_b1.54,w_b1.55,w_b1.56,w_b1.57,w_b1.58,w_b1.59,w_b1.60,w_b1.61,w_b1.62,w_b1.63,w_b1.64,w_b1.65,w_b1.66,w_b1.67,w_b1.68,w_b1.69,w_b1.70,w_b1.71,w_b1.72,w_b1.73,w_b1.74,w_b1.75,w_b1.76,w_b1.77,w_b1.78,w_b1.79,w_b1.80,w_b1.81,w_b1.82,w_b1.83,w_b1.84,w_b1.85,w_b1.86,w_b1.87,w_b1.88,w_b1.89,w_b1.90,w_b1.91,w_b1.92,w_b1.93,w_b1.94,w_b1.95,w_b1.96,w_b1.97,w_b1.98,w_b1.99,w_b1.100,w_b1.101,w_b1.102,w_b1.103,w_b1.104,w_b1.105,w_b1.106,w_b1.107,w_b1.108,w_b1.109,w_b1.110,w_b1.111,w_b1.112,w_b1.113,w_b1.114,w_b1.115,w_b1.116,w_b1.117,w_b1.118,w_b1.119,w_b1.120,w_b1.121,w_b1.122,w_b1.123,w_b1.124,w_b1.125,w_b1.126,w_b1.127,w_b1.128,w_b1.129,w_b1.130,w_b1.131,w_b1.132,w_b1.133,w_b1.134,w_b1.135,w_b1.136,w_b1.137,w_b1.138,w_b1.139,w_b1.140,w_b1.141,w_b1.142,w_b1.143,w_b1.144,w_b1.145,w_b1.146,w_b1.147,w_b1.148,w_b1.149,w_b1.150,w_b1.151,w_b1.152,w_b1.153,w_b1.154,w_b1.155,w_b1.156,w_b1.157,w_b1.158,w_b1.159,w_b1.160,w_b1.161,w_b1.162,w_b1.163,w_b1.164,w_b1.165,w_b1.166,w_b1.167,w_b1.168,w_b1.169,w_b1.170,w_b1.171,w_b1.172,w_b1.173,w_b1.174,w_b1.175,w_b1.176,w_b1.177,w_b1.178,w_b1.179,w_b1.180,w_b1.181,w_b1.182,w_b1.183,w_b1.184,w_b1.185,w_b1.186,w_b1.187,w_b1.188,w_b1.189,w_b1.190,w_b1.191,w_b1.192,w_b1.193,w_b1.194,w_b1.195,w_b1.196,w_b1.197,w_b1.198,w_b1.199,w_b1.200,w_b1.201,w_b1.202,w_b1.203,w_b1.204,w_b1.205,w_b1.206,w_b1.207,w_b1.208,w_b1.209,w_b1.210,w_b1.211,w_b1.212,w_b1.213,w_b1.214,w_b1.215,w_b1.216,w_b1.217,w_b1.218,w_b1.219,w_b1.220,w_b1.221,w_b1.222,w_b1.223,w_b1.224,w_b1.225,w_b1.226,w_b1.227,w_b1.228,w_b1.229,w_b1.230,w_b1.231,w_b1.232,w_b1.233,w_b1.234,w_b1.235,w_b1.236,w_b1.237,w_b1.238,w_b1.239,w_b1.240,w_b1.241,w_b1.242,w_b1.243,w_b1.244,w_b1.245,w_b1.246,w_b1.247,w_b1.248,w_b1.249,w_b1.250,w_b1.251,w_b1.252,w_b1.253,w_b1.254,w_b1.255,w_b1.256,w_b1.257,w_b1.258,w_b1.259,w_b1.260,w_b1.261,w_b1.262,w_b1.263,w_b1.264,w_b1.265,w_b1.266,w_b1.267,w_b1.268,w_b1.269,w_b1.270,w_b1.271,w_b1.272,w_b1.273,w_b1.274,w_b1.275,w_b1.276,w_b1.277,w_b1.278,w_b1.279,w_b1.280,w_b1.281,w_b1.282,w_b1.283,w_b1.284,w_b1.285,w_b1.286,w_b1.287,w_b1.288,w_b1.289,w_b1.290,w_b1.291,w_b1.292,w_b1.293,w_b1.294,w_b1.295,w_b1.296,w_b1.297,w_b1.298,w_b1.299,w_b1.300,w_b1.301,w_b1.302,w_b1.303,w_b1.304,w_b1.305,w_b1.306,w_b1.307,w_b1.308,w_b1.309,w_b1.310,w_b1.311,w_b1.312,w_b1.313,w_b1.314,w_b1.315,w_b1.316,w_b1.317,w_b1.318,w_b1.319,w_b1.320,w_b1.321,w_b1.322,w_b1.323,w_b1.324,w_b1.325,w_b1.326,w_b1.327,w_b1.328,w_b1.329,w_b1.330,w_b1.331,w_b1.332,w_b1.333,w_b1.334,w_b1.335,w_b1.336,w_b1.337,w_b1.338,w_b1.339,w_b1.340,w_b1.341,w_b1.342,w_b1.343,w_b1.344,w_b1.345,w_b1.346,w_b1.347,w_b1.348,w_b1.349,w_b1.350,w_b1.351,w_b1.352,w_b1.353,w_b1.354,w_b1.355,w_b1.356,w_b1.357,w_b1.358,w_b1.359,w_b1.360,w_b1.361,w_b1.362,w_b1.363,w_b1.364,w_b1.365,w_b1.366,w_b1.367,w_b1.368,w_b1.369,w_b1.370,w_b1.371,w_b1.372,w_b1.373,w_b1.374,w_b1.375,w_b1.376,w_b1.377,w_b1.378,w_b1.379,w_b1.380,w_b1.381,w_b1.382,w_b1.383,w_b1.384,w_b1.385,w_b1.386,w_b1.387,w_b1.388,w_b1.389,w_b1.390,w_b1.391,w_b1.392,w_b1.393,w_b1.394,w_b1.395,w_b1.396,w_b1.397,w_b1.398,w_b1.399,w_b1.400,w_b1.401,w_b1.402,w_b1.403,w_b1.404,w_b1.405,w_b1.406,w_b1.407,w_b1.408,w_b1.409,w_b1.410,w_b1.411,w_b1.412,w_b1.413,w_b1.414,w_b1.415,w_b1.416,w_b1.417,w_b1.418,w_b1.419,w_b1.420,w_b1.421,w_b1.422,w_b1.423,w_b1.424,w_b1.425,w_b1.426,w_b1.427,w_b1.428,w_b1.429,w_b1.430,w_b1.431,w_b1.432,w_b1.433,w_b1.434,w_b1.435,w_b1.436,w_b1.437,w_b1.438,w_b1.439,w_b1.440,w_b1.441,w_b1.442,w_b1.443,w_b1.444,w_b1.445,w_b1.446,w_b1.447,w_b1.448,w_b1.449,w_b1.450,w_b1.451,w_b1.452,w_b1.453,w_b1.454,w_b1.455,w_b1.456,w_b1.457,w_b1.458,w_b1.459,w_b1.460,w_b1.461,w_b1.462,w_b1.463,w_b1.464,w_b1.465,w_b1.466,w_b1.467,w_b1.468,w_b1.469,w_b1.470,w_b1.471,w_b1.472,w_b1.473,w_b1.474,w_b1.475,w_b1.476,w_b1.477,w_b1.478,w_b1.479,w_b1.480,w_b1.481,w_b1.482,w_b1.483,w_b1.484,w_b1.485,w_b1.486,w_b1.487,w_b1.488,w_b1.489,w_b1.490,w_b1.491,w_b1.492,w_b1.493,w_b1.494,w_b1.495,w_b1.496,w_b1.497,w_b1.498,w_b1.499,w_b1.500,sigmasq,tausq

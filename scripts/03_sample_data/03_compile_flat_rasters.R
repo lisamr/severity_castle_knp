@@ -38,7 +38,7 @@ rclmat <- matrix(
   ncol = 2, byrow = T
 )
 veg_rc <- classify(veg, rclmat)
-
+# now: 1 = conifer, 2 = hardwood, 3 = shrub/herbaceous, 4 = not really burnable 
 # reproject any rasters ---------------------------------------------------
 
 # climate needs to be resampled to a 30m grid. default is bilinear.

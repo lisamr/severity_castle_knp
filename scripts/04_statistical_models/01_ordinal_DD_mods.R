@@ -205,8 +205,8 @@ names(dat$rings2)
 
 vars <- c(
   # vegetation
-  #'ndvi', 
-  'veg_2', 'veg_3', #'TPA_conifer',
+  'ndvi', 
+  'veg_2', 'veg_3', #'TPA_conifer', # intercept=conifer, # now: 1 = conifer, veg2 = hardwood, veg3 = shrub/herbaceous
   # topography
   'elevation', 'slope', 'HLI', 'TPI_500',
   # climate
@@ -214,13 +214,12 @@ vars <- c(
   # weather
   'vpd_day'#, 'wind_day'
 )
-#dd <- c('dead_area', 'cover')
-#dd <- c('dead_area_con', 'cover_con') # variables make sense. same results as counts
-dd <- c('dead_count_con', 'TPA_con') # same as area. 
-#dd <- c('dead_count', 'TPA') 
+#dd <- c('dead_area', 'cover') # tree density without masking out non-conifer vegetation
+#dd <- c('dead_area_con', 'cover_con') # tree density (area) with non-conifers masked out.
+dd <- c('dead_count_con', 'TPA_con') # tree density (counts) with non-conifers masked out
 intvars <- c('vpd_day', 'veg_2', 'veg_3')#, 'wind_day')
 N <- 5000
-by <- 5 # every n cells sampled on a regular grid
+by <- 2 # every n cells sampled on a regular grid
 mask_ids <- which(dat$all_vars$veg == 4) # mask out veg4
 
 dat_list <- f_prepdatlist(X_vars = vars, dd_vars = dd, int_var = intvars,
@@ -237,7 +236,15 @@ sim_grid <- expand_grid(ddvar = seq(0,5,by=.2),
          )
 dat_list <- f_add_simdata(dat_list, sim_grid$ddvarz, sim_grid$intvarz)
 str(dat_list)
-#dat$loc[dat_list$idx,] %>% plot
+
+# see what you've sampled. 
+tmp <- as.data.frame(dat$loc[dat_list$idx,])
+ggplot(tmp, aes(x, y)) +
+  geom_point() +
+  coord_equal()
+spacing <- min(dist(tmp[1:10,]))
+spacing # spacing of grid in meters
+
 
 # fit the model
 #fit <- stanmod$sample(dat_list, parallel_chains = 4, chains = 4, iter_sampling = 1000, iter_warmup = 1000)
@@ -413,9 +420,9 @@ f_w90(w, xlim= c(.05, .4), xlab = 'Distance (km)', ylab = 'Cumulative effect',
 # plotting covariates -----------------------------------------------------
 
 dd_names <- c('dead.trees', 'live.trees')
-fit_summary <- fit_int$summary(variables = c('B', 'beta', 'beta_int', 'c', 'delta')) %>% 
+fit_summary <- fit_int$summary(variables = c('B', 'beta', 'c', 'delta')) %>% 
   mutate(variable_name = c(vars, dd_names, 
-                           paste0('vpd x ', dd_names), 
+                           #paste0('vpd x ', dd_names), 
                            paste0("c_", 1:3), 
                            paste0("delta_", dd_names)), 
          variable_namef = factor(variable_name, levels = rev(variable_name)),
