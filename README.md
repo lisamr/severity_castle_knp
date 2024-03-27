@@ -20,7 +20,7 @@ $$
 \begin{aligned}
 y_i &\sim \text{ordered-logit}(\phi_i, \kappa) \\
 \phi_i &= XB + (X_{DD} W)\beta + \text{interaction terms} \\
-w_{0[m]} &= exp(-2*distance_m^2 / \delta^2) * area_m \\
+w_{0[m]} &= exp(-1/2*distance_m^2 / \delta^2) * area_m \\
 W &= \dfrac{w_0}{\Sigma^M_m w_{0[m]} }
 \end{aligned}
 $$
